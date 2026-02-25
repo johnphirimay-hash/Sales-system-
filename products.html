@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Products</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; }
+    input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; font-size: 16px; }
+    #productList { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+    #productList li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h2>Add Products</h2>
+
+  <form id="productForm">
+    <input type="text" name="product_name" placeholder="Product Name" required>
+    <input type="number" name="quantity" placeholder="Quantity" required>
+    <input type="number" name="total_cost" placeholder="Total Cost" required>
+    <button type="submit">Add Product</button>
+  </form>
+
+  <ul id="productList"></ul>
+
+  <button id="goToSales">Go to Record Sales</button>
+  <button id="goToDashboard">View Dashboard</button>
+
+  <script>
+    const shop_id = localStorage.getItem("shop_id");
+    if (!shop_id) {
+      alert("No shop logged in.");
+      window.location.href = "/login.html";
+    }
+
+    const form = document.getElementById("productForm");
+    const productList = document.getElementById("productList");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const product_name = form.product_name.value;
+      const quantity = form.quantity.value;
+      const total_cost = form.total_cost.value;
+
+      try {
+        const res = await fetch("/add-product", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shop_id, product_name, quantity, total_cost })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`Product "${product_name}" added successfully!`);
+          // Add to the list visually
+          const li = document.createElement("li");
+          li.textContent = `${product_name} - Qty: ${quantity} - Total Cost: ${total_cost}`;
+          productList.appendChild(li);
+          form.reset();
+        } else {
+          alert(data.error || "Failed to add product");
+        }
+      } catch (err) {
+        console.error("Add product error:", err);
+        alert("Something went wrong.");
+      }
+    });
+
+    document.getElementById("goToSales").addEventListener("click", () => {
+      window.location.href = "/sales.html";
+    });
+
+    document.getElementById("goToDashboard").addEventListener("click", () => {
+      window.location.href = "/dashboard.html";
+    });
+  </script>
+</body>
+</html>

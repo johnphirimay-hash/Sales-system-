@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shop Registration</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: auto; padding: 20px; }
+    h2 { text-align: center; }
+    input, button { margin: 10px 0; padding: 10px; width: 100%; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>Register Your Shop</h2>
+
+  <form id="registerForm">
+    <input type="text" name="shop_name" placeholder="Shop Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <button type="submit">Register</button>
+  </form>
+
+  <button id="goToLogin">Already have an account? Login</button>
+
+  <script>
+    const registerForm = document.getElementById("registerForm");
+
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const shop_name = document.querySelector("[name='shop_name']").value;
+      const email = document.querySelector("[name='email']").value;
+      const password = document.querySelector("[name='password']").value;
+
+      try {
+        const res = await fetch("/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shop_name, email, password })
+        });
+        const data = await res.json();
+
+        if (data.shop_id) {
+          // Auto-login after registration
+          localStorage.setItem("shop_id", data.shop_id);
+          alert("Registration successful! Redirecting to Products page...");
+          window.location.href = "/products.html";
+        } else {
+          alert(data.error || "Registration failed");
+        }
+      } catch (err) {
+        console.error("Registration error:", err);
+        alert("Something went wrong.");
+      }
+    });
+
+    document.getElementById("goToLogin").addEventListener("click", () => {
+      window.location.href = "/login.html";
+    });
+  </script>
+
+</body>
+</html>
